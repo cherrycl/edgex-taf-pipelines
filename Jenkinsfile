@@ -15,7 +15,7 @@ def call(config) {
 
     pipeline {
         agent { label edgex.mainNode(config) }
-        triggers { cron('H 23 * * 5') }
+        //triggers { cron('H 23 * * 5') }
         options {
             timestamps()
         }

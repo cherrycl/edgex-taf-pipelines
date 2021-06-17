@@ -8,11 +8,11 @@ def main() {
     node("${NODE}") {
         stage ('Checkout edgex-taf repository') {
             checkout([$class: 'GitSCM',
-                branches: [[name: "*/master"]],
+                branches: [[name: "*/issue-393"]],
                 doGenerateSubmoduleConfigurations: false, 
                 extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']], 
                 submoduleCfg: [], 
-                userRemoteConfigs: [[url: 'https://github.com/edgexfoundry/edgex-taf.git']]
+                userRemoteConfigs: [[url: 'https://github.com/cherrycl/edgex-taf.git']]
                 ])
         }
 
@@ -48,9 +48,9 @@ def main() {
                     sh 'mkdir stash-report'
                 }
                 // rename reports
-                sh "sudo cp rebot-report/log.html stash-report/perf-metrics-${ARCH}${USE_SECURITY}log.html || true"
-                sh "sudo cp rebot-report/result.xml stash-report/perf-metrics-${ARCH}${USE_SECURITY}report.xml || true"
-                sh "sudo cp edgex/performance-metrics.html stash-report/perf-metrics-${ARCH}${USE_SECURITY}summary.html || true"
+                sh "sudo cp rebot-report/log.html stash-report/perf-metrics-${ARCH}${USE_SECURITY}log.html"
+                sh "sudo cp rebot-report/result.xml stash-report/perf-metrics-${ARCH}${USE_SECURITY}report.xml"
+                sh "sudo cp edgex/performance-metrics.html stash-report/perf-metrics-${ARCH}${USE_SECURITY}summary.html"
             } 
             stash name: "perf-metrics-${ARCH}${USE_SECURITY}report", includes: "TAF/testArtifacts/reports/stash-report/*", allowEmpty: true
         }
