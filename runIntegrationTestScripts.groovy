@@ -39,7 +39,7 @@ def main() {
                             --security-opt label:disable -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} \
                             -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} -v /tmp/edgex/secrets:/tmp/edgex/secrets:z \
                             -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
-                            --exclude Skipped -u integrationTest -p device-virtual"
+                            --exclude Skipped -u integrationTest/UC_device_service/messagebus_true.robot -p device-virtual"
                 }
 
                 stage ("Stash Report - ${ARCH}${USE_DB}${USE_SECURITY}${BRANCH}") {
