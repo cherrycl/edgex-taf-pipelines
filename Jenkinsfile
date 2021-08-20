@@ -52,12 +52,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_AMD64}"
                         }
                         stages {
-                            stage('amd64-redis'){
+                            stage('amd64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -66,12 +65,11 @@ def call(config) {
                                     }
                                 }
                             }
-                            stage('amd64-redis-security'){
+                            stage('amd64-security'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'Yes' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = true
                                 }
                                 steps {
@@ -94,12 +92,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_ARM64}"
                         }
                         stages {
-                            stage('arm64-redis'){
+                            stage('arm64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -108,12 +105,11 @@ def call(config) {
                                     }
                                 }
                             }
-                            stage('arm64-redis-security'){
+                            stage('arm64-security'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'Yes' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = true
                                 }
                                 steps {
@@ -132,18 +128,18 @@ def call(config) {
                     script {
                         if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'x86_64')) {
                             if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                catchError { unstash "x86_64-redis-report" }
+                                catchError { unstash "x86_64-report" }
                             }
                             if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'Yes')) {
-                                catchError { unstash "x86_64-redis-security-report" }
+                                catchError { unstash "x86_64-security-report" }
                             }
                         }
                         if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'arm64')) {
                             if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                catchError { unstash "arm64-redis-report" }
+                                catchError { unstash "arm64-report" }
                             }
                             if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'Yes')) {
-                                catchError { unstash "arm64-redis-security-report" }
+                                catchError { unstash "arm64-security-report" }
                             }
                         }
                     
