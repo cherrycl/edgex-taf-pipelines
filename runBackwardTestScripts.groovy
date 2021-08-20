@@ -8,7 +8,7 @@ def main() {
         USE_SECURITY = '-security-'
     }
 
-    runbranchstage["BackwardTest ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}"]= {
+    runbranchstage["BackwardTest ${ARCH}${USE_SECURITY}${TAF_BRANCH}"]= {
         node("${NODE}") {
             stage ('Checkout edgex-taf repository') {
                 checkout([$class: 'GitSCM',
@@ -20,20 +20,20 @@ def main() {
                 ])
             }
 
-            stage ("[${BCT_RELEASE}] Deploy EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[${BCT_RELEASE}] Deploy EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 dir ('TAF/utils/scripts/docker') {
-                    sh "sh get-compose-file.sh ${USE_DB} ${ARCH} ${USE_SECURITY} ${BCT_RELEASE}"
+                    sh "sh get-compose-file.sh  ${ARCH} ${USE_SECURITY} ${BCT_RELEASE}"
                     sh 'ls *.yml *.yaml'
                 }
 
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
-                    -e USE_DB=${USE_DB} --security-opt label:disable \
+                    --security-opt label:disable \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
                     --exclude Skipped --include deploy-base-service -u deploy.robot -p default"
             }
 
-            stage ("[${BCT_RELEASE}] Run Tests Script - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[${BCT_RELEASE}] Run Tests Script - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 echo "Profile : ${profile}"
                 echo "===== Deploy ${profile} ====="
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
@@ -60,27 +60,27 @@ def main() {
                     --exclude Skipped --include shutdown-device-service -u shutdown.robot -p ${profile}"
             }
 
-            stage ("[${BCT_RELEASE}] Stop EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[${BCT_RELEASE}] Stop EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 sh 'curl -X DELETE http://localhost:48080/api/v1/event/scruball'
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     --security-opt label:disable -v /var/run/docker.sock:/var/run/docker.sock ${COMPOSE_IMAGE} \
                     -f ${env.WORKSPACE}/TAF/utils/scripts/docker/docker-compose.yaml stop"
             }
                 
-            stage ("[Backward] Deploy EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[Backward] Deploy EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 dir ('TAF/utils/scripts/docker') {
-                    sh "sh get-compose-file-backward.sh ${USE_DB} ${ARCH} ${USE_SECURITY} ${BCT_RELEASE}"
+                    sh "sh get-compose-file-backward.sh ${ARCH} ${USE_SECURITY} ${BCT_RELEASE}"
                     sh 'ls *.yaml'
                 }
 
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} --security-opt label:disable \
-                    -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} -e USE_DB=${USE_DB} \
+                    -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
                     --exclude Skipped --include backward -u deploy.robot -p ${profile}"
             }
                 
-            stage ("[Backward] Run Tests Script - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[Backward] Run Tests Script - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 echo "Profile : ${profile}"
                 echo "===== Run ${profile} Test Case ====="
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
@@ -95,7 +95,7 @@ def main() {
                 }
             }
                 
-            stage ("[Backward] Stash Report - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[Backward] Stash Report - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 echo '===== Merge Reports ====='
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} ${TAF_COMMON_IMAGE} \
@@ -112,13 +112,13 @@ def main() {
                         sh 'mkdir ../merged-report'
                     }
                     //Copy log file to merged-report folder
-                    sh "cp log.html ../merged-report/backward-${ARCH}${USE_DB}${USE_SECURITY}${BCT_RELEASE}-log.html"
-                    sh "cp result.xml ../merged-report/backward-${ARCH}${USE_DB}${USE_SECURITY}${BCT_RELEASE}-report.xml"
+                    sh "cp log.html ../merged-report/backward-${ARCH}${USE_SECURITY}${BCT_RELEASE}-log.html"
+                    sh "cp result.xml ../merged-report/backward-${ARCH}${USE_SECURITY}${BCT_RELEASE}-report.xml"
                 }
-                stash name: "backward-${ARCH}${USE_DB}${USE_SECURITY}${BCT_RELEASE}-report", includes: "TAF/testArtifacts/reports/merged-report/*", allowEmpty: true
+                stash name: "backward-${ARCH}${USE_SECURITY}${BCT_RELEASE}-report", includes: "TAF/testArtifacts/reports/merged-report/*", allowEmpty: true
             }
                 
-            stage ("[Backward] Shutdown EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("[Backward] Shutdown EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     --security-opt label:disable -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \

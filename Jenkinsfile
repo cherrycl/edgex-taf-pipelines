@@ -53,12 +53,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_AMD64}"
                         }
                         stages {
-                            stage('amd64-redis'){
+                            stage('amd64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -67,12 +66,11 @@ def call(config) {
                                     }
                                 }
                             }
-                            stage('amd64-redis-security'){
+                            stage('amd64-security'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'Yes' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = true
                                 }
                                 steps {
@@ -95,12 +93,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_AMD64}"
                         }
                         stages {
-                            stage('backward-amd64-redis'){
+                            stage('backward-amd64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -123,12 +120,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_ARM64}"
                         }
                         stages {
-                            stage('arm64-redis'){
+                            stage('arm64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -137,12 +133,11 @@ def call(config) {
                                     }
                                 }
                             }
-                            stage('arm64-redis-security'){
+                            stage('arm64-security'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'Yes' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = true
                                 }
                                 steps {
@@ -165,12 +160,11 @@ def call(config) {
                             COMPOSE_IMAGE = "${COMPOSE_IMAGE_ARM64}"
                         }
                         stages {
-                            stage('arm64-redis'){
+                            stage('arm64'){
                                 when { 
                                     expression { params.WITH_SECURITY == 'All' || params.WITH_SECURITY == 'No' }
                                 }
                                 environment {
-                                    USE_DB = '-redis'
                                     SECURITY_SERVICE_NEEDED = false
                                 }
                                 steps {
@@ -190,12 +184,12 @@ def call(config) {
                         if (("${params.TEST_STRATEGY}" == 'All' || "${params.TEST_STRATEGY}" == 'BackwardTest')) {
                             if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'x86_64')) {
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                    catchError { unstash "backward-x86_64-redis-${BCT_RELEASE}-report" }
+                                    catchError { unstash "backward-x86_64-${BCT_RELEASE}-report" }
                                 }
                             }
                             if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'arm64')) {
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                    catchError { unstash "backward-arm64-redis-${BCT_RELEASE}-report" }
+                                    catchError { unstash "backward-arm64-${BCT_RELEASE}-report" }
                                 }
                             }
                         }
@@ -204,18 +198,18 @@ def call(config) {
                         if (("${params.TEST_STRATEGY}" == 'All' || "${params.TEST_STRATEGY}" == 'IntegrationTest')) {
                             if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'x86_64')) {
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                    catchError { unstash "integration-x86_64-redis-report" }
+                                    catchError { unstash "integration-x86_64-report" }
                                 }
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'Yes')) {
-                                    catchError { unstash "integration-x86_64-redis-security-report" }
+                                    catchError { unstash "integration-x86_64-security-report" }
                                 }
                             }
                             if (("${params.TEST_ARCH}" == 'All' || "${params.TEST_ARCH}" == 'arm64')) {
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'No')) {
-                                    catchError { unstash "integration-arm64-redis-report" }
+                                    catchError { unstash "integration-arm64-report" }
                                 }
                                 if (("${params.WITH_SECURITY}" == 'All' || "${params.WITH_SECURITY}" == 'Yes')) {
-                                    catchError { unstash "integration-arm64-redis-security-report" }
+                                    catchError { unstash "integration-arm64-security-report" }
                                 }
                             }
                         }
