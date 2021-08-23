@@ -8,7 +8,7 @@ def main() {
         USE_SECURITY = '-security-'
     }
 
-    runbranchstage["Test ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}"]= {
+    runbranchstage["Test ${ARCH}${USE_SECURITY}${TAF_BRANCH}"]= {
         node("${NODE}") {
             stage ('Checkout edgex-taf repository') {
                 checkout([$class: 'GitSCM',
@@ -20,19 +20,19 @@ def main() {
                 ])
             }
 
-            stage ("Deploy EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Deploy EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 dir ('TAF/utils/scripts/docker') {
-                    sh "sh get-compose-file.sh ${USE_DB} ${ARCH} ${USE_SECURITY} pre-release ${COMPOSE_BRANCH}"
+                    sh "sh get-compose-file.sh  ${ARCH} ${USE_SECURITY} ${COMPOSE_BRANCH}"
                 }
 
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
-                    -e USE_DB=${USE_DB} --security-opt label:disable \
+                    --security-opt label:disable \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
                     --exclude Skipped --include deploy-base-service -u deploy.robot -p default"
                 }
                 
-            stage ("Run V2 API Tests - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}"){
+            stage ("Run V2 API Tests - ${ARCH}${USE_SECURITY}${TAF_BRANCH}"){
                 echo "===== Run V2 API Tests ====="
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
@@ -47,7 +47,7 @@ def main() {
             }
 
             echo "Profiles : ${PROFILES}"
-            stage ("Run Device Service Tests - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Run Device Service Tests - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 script {
                     for (y in PROFILES) {
                         def profile = y
@@ -67,7 +67,7 @@ def main() {
                 }
             }
 
-            stage ("Stash Report - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Stash Report - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 echo '===== Merge Reports ====='
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} ${TAF_COMMON_IMAGE} \
@@ -84,13 +84,13 @@ def main() {
                         sh 'mkdir ../merged-report'
                     }
                     //Copy log file to merged-report folder
-                    sh "cp log.html ../merged-report/${ARCH}${USE_DB}${USE_SECURITY}log.html"
-                    sh "cp result.xml ../merged-report/${ARCH}${USE_DB}${USE_SECURITY}report.xml"
+                    sh "cp log.html ../merged-report/${ARCH}${USE_SECURITY}log.html"
+                    sh "cp result.xml ../merged-report/${ARCH}${USE_SECURITY}report.xml"
                 }
-                stash name: "${ARCH}${USE_DB}${USE_SECURITY}report", includes: "TAF/testArtifacts/reports/merged-report/*", allowEmpty: true
+                stash name: "${ARCH}${USE_SECURITY}report", includes: "TAF/testArtifacts/reports/merged-report/*", allowEmpty: true
             }
 
-            stage ("Shutdown EdgeX - ${ARCH}${USE_DB}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Shutdown EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} --security-opt label:disable \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
