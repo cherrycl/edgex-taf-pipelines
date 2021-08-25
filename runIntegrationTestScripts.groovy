@@ -83,7 +83,7 @@ def main() {
                 echo '===== Merge Reports ====='
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                     -e COMPOSE_IMAGE=${COMPOSE_IMAGE} ${TAF_COMMON_IMAGE} \
-                    rebot --inputdir TAF/testArtifacts/reports/edgex \
+                    rebot --inputdir TAF/testArtifacts/reports/rename-report \
                     --outputdir TAF/testArtifacts/reports/integration-report"
 
                 dir ("TAF/testArtifacts/reports/integration-report") {
