@@ -170,7 +170,7 @@ def call(config) {
 
 def startTest() {
     catchError {
-        timeout(time: 1, unit: 'HOURS') {
+        timeout(time: 80, unit: 'MINUTES') {
             def rootDir = pwd()
             def runTestScripts = load "${rootDir}/runTestScripts.groovy"
             runTestScripts.main()
