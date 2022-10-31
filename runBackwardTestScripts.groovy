@@ -12,7 +12,7 @@ def main(CORE_SERVICES_RELEASE, COMPATIBLE_RELEASE, USE_APP_SERVICE, USE_DEVICE_
         stage ("${ARCH}${USE_SECURITY} ${CASE} Checkout edgex-taf repository") {
             checkout([$class: 'GitSCM',
                 //branches: [[name: "*/main"]],
-                branches: [[name: "*/issue-693"]],
+                branches: [[name: "*/fix-backward"]],
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
                 submoduleCfg: [],
@@ -71,8 +71,8 @@ def main(CORE_SERVICES_RELEASE, COMPATIBLE_RELEASE, USE_APP_SERVICE, USE_DEVICE_
             echo "[${BCT_RELEASE}] ${ARCH}${USE_SECURITY} ${CASE} - Down EdgeX"
             //sh 'curl -X DELETE http://localhost:48080/api/v2/event/age/0'
             sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
-                --security-opt label:disable -v /var/run/docker.sock:/var/run/docker.sock ${COMPOSE_IMAGE} \
-                -f ${env.WORKSPACE}/TAF/utils/scripts/docker/docker-compose.yml down"
+                -e CONF_DIR=/custom-config --security-opt label:disable -v /var/run/docker.sock:/var/run/docker.sock \
+                ${COMPOSE_IMAGE} docker compose -f ${env.WORKSPACE}/TAF/utils/scripts/docker/docker-compose.yml down"
             
                 
             echo "[Backward] ${ARCH}${USE_SECURITY} ${CASE} - Generate Backward Compose file"
