@@ -18,7 +18,7 @@ def main() {
                 ])
             }
 
-            stage ("Deploy EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Deploy EdgeX For Funcational- ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 dir ('TAF/utils/scripts/docker') {
                     sh "sh get-compose-file.sh ${ARCH} ${USE_SECURITY} ${params.SHA1}"
                 }
@@ -29,12 +29,12 @@ def main() {
                     --exclude Skipped --include deploy-base-service -u deploy.robot -p default"
             }
 
-            stage ("Run Functional Tests Script - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+            stage ("Run Functional Test Script - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
                 sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
                     --security-opt label:disable -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} \
                     -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
-                    --exclude Skipped --include SmokeTest -u functionalTest/V2-API -p default"
+                    --exclude Skipped --include SmokeTest -u functionalTest/V2-API -p default --name funcational"
                     
                 dir ('TAF/testArtifacts/reports/rename-report') {
                     sh "cp ../edgex/log.html functional-log.html"
@@ -54,6 +54,44 @@ def main() {
                     sh "cp ../edgex/log.html device-service-log.html"
                     sh "cp ../edgex/report.xml device-service-report.xml"
                 }
+            }
+
+            stage ("Shutdown EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+                sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
+                    -e COMPOSE_IMAGE=${COMPOSE_IMAGE} --security-opt label:disable \
+                    -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
+                    --exclude Skipped --include shutdown-edgex -u shutdown.robot -p default"
+            }
+
+            stage ("Deploy EdgeX For Integration MQTT Bus- ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+                dir ('TAF/utils/scripts/docker') {
+                    sh "sh get-compose-file.sh ${ARCH} ${USE_SECURITY} ${params.SHA1} integration-test"
+                }
+
+                sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
+                    -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
+                    --security-opt label:disable -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
+                    --exclude Skipped --include mqtt-bus -u deploy.robot -p default"
+            }
+
+            stage ("Run Integration Test Script - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+                sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
+                    --security-opt label:disable -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} \
+                    -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} -v /var/run/docker.sock:/var/run/docker.sock \
+                    --env-file ${env.WORKSPACE}/TAF/utils/scripts/docker/common-taf.env ${TAF_COMMON_IMAGE} \
+                    --exclude Skipped --include SmokeTest -u integrationTest -p default --name integration"
+                    
+                dir ('TAF/testArtifacts/reports/rename-report') {
+                    sh "cp ../edgex/log.html integration-mqt-log.html"
+                    sh "cp ../edgex/report.xml integration-mqt-report.xml"
+                }
+            }
+
+            stage ("Shutdown EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
+                sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
+                    -e COMPOSE_IMAGE=${COMPOSE_IMAGE} --security-opt label:disable \
+                    -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
+                    --exclude Skipped --include shutdown-edgex -u shutdown.robot -p default"
             }
 
             stage ("Stash Report - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
@@ -77,13 +115,6 @@ def main() {
                     sh "cp result.xml ../merged-report/smoke-${ARCH}${USE_SECURITY}${TAF_BRANCH}-report.xml"
                 }
                 stash name: "smoke-${ARCH}${USE_SECURITY}${TAF_BRANCH}-report", includes: "TAF/testArtifacts/reports/merged-report/*", allowEmpty: true
-            }
-
-            stage ("Shutdown EdgeX - ${ARCH}${USE_SECURITY}${TAF_BRANCH}") {
-                sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:z -w ${env.WORKSPACE} \
-                    -e COMPOSE_IMAGE=${COMPOSE_IMAGE} --security-opt label:disable \
-                    -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
-                    --exclude Skipped --include shutdown-edgex -u shutdown.robot -p default"
             }
         }
     }
