@@ -44,17 +44,17 @@ def main() {
             }
             
             if ( deploySuccess == 0 ) {
-                stage ("Run V2 API Tests - ${ARCH}${USE_SECURITY}${TAF_BRANCH}"){
-                    echo "===== Run V2 API Tests ====="
+                stage ("Run API Tests - ${ARCH}${USE_SECURITY}${TAF_BRANCH}"){
+                    echo "===== Run API Tests ====="
                     sh "docker run --rm --network host -v ${env.WORKSPACE}:${env.WORKSPACE}:rw,z -w ${env.WORKSPACE} \
                         -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
                         -e ARCH=${ARCH}  --env-file ${env.WORKSPACE}/TAF/utils/scripts/docker/common-taf.env \
                         --security-opt label:disable -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
-                        --exclude Skipped --include v2-api -u functionalTest/V2-API -p default --name V2-API"
+                        --exclude Skipped -u functionalTest/API -p default --name API"
 
                     dir ('TAF/testArtifacts/reports/rename-report') {
-                        sh "cp ../edgex/log.html v2-api-log.html"
-                        sh "cp ../edgex/report.xml v2-api-report.xml"
+                        sh "cp ../edgex/log.html api-log.html"
+                        sh "cp ../edgex/report.xml api-report.xml"
                     }
                 }
             
