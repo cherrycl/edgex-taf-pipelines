@@ -36,14 +36,6 @@ def call(config) {
             COMPOSE_IMAGE = 'docker:20.10.18'
         }
         stages { 
-            stage ('Stop Test') {
-                steps {
-                    script {
-                        echo "Stop smoke test temporarily"
-                    }
-                }
-            }
-            /*
             stage ('Run Test') {
                 parallel {
                     stage ('Run Smoke Test on amd64') {
@@ -165,7 +157,7 @@ def call(config) {
                     junit 'TAF/testArtifacts/reports/merged-report/**.xml'
                 }                                         
             }
-        */ }
+        }
     }
 } 
 
