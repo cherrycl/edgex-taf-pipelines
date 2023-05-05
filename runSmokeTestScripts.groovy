@@ -34,7 +34,7 @@ def main() {
                     --security-opt label:disable -e COMPOSE_IMAGE=${COMPOSE_IMAGE} -e ARCH=${ARCH} \
                     -e SECURITY_SERVICE_NEEDED=${SECURITY_SERVICE_NEEDED} \
                     -v /var/run/docker.sock:/var/run/docker.sock ${TAF_COMMON_IMAGE} \
-                    --exclude Skipped --include SmokeTest -u functionalTest/V2-API -p default --name funcational"
+                    --exclude Skipped --include SmokeTest -u functionalTest/API -p default --name funcational"
                     
                 dir ('TAF/testArtifacts/reports/rename-report') {
                     sh "cp ../edgex/log.html functional-log.html"
