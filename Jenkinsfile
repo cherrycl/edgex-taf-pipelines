@@ -33,7 +33,7 @@ def call(config) {
             TAF_BRANCH = 'main'
             TAF_COMMON_IMAGE_AMD64 = 'nexus3.edgexfoundry.org:10003/edgex-taf-common:latest'
             TAF_COMMON_IMAGE_ARM64 = 'nexus3.edgexfoundry.org:10003/edgex-taf-common-arm64:latest'
-            COMPOSE_IMAGE = 'docker:20.10.18'
+            COMPOSE_IMAGE = 'docker:26.0.1'
         }
         stages { 
             stage ('Run Test') {
